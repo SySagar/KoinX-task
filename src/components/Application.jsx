@@ -11,11 +11,13 @@ import React from "react";
 import InputAdornment from "@mui/material/InputAdornment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 export default function Application() {
   const [age, setAge] = React.useState(10);
   const [income, setIncome] = React.useState(1);
   const [gainValue, setGainValue] = React.useState(0);
+  const isPhone = useMediaQuery('(max-width:500px)');
 
   const handleChange = (event) => {
     setAge(event.target.value);
@@ -31,7 +33,7 @@ export default function Application() {
   };
 
   return (
-    <Stack padding={3} direction={"row"} gap={3}>
+    <Stack className="application-container" padding={3} direction={"row"} gap={3}>
       <Stack
         className="left"
         padding={3}
@@ -44,7 +46,8 @@ export default function Application() {
           borderRadius: "10px",
         }}
       >
-        <Typography variant="h5" fontWeight={"bold"}>
+        <Typography variant={(isPhone) ? "body1" : "h5"}
+         fontWeight={"bold"}>
           Free Crypto Tax Calculator Australia
         </Typography>
 
@@ -55,8 +58,9 @@ export default function Application() {
           gap={3}
         >
           <Stack
+          className="upper-info"
             direction={"row"}
-            gap={6}
+            gap={(isPhone)? 2 : 6}
             width={"100%"}
             justifyContent={"left"}
             alignItems={"center"}
@@ -67,7 +71,9 @@ export default function Application() {
               alignItems={"center"}
               gap={1}
             >
-              <Typography sx={{ color: "#0F1629" }} variant="body2">
+              <Typography sx={{ color: "#0F1629" }} 
+              variant={(isPhone) ? "caption" : "body2"}
+              >
                 Financial Year
               </Typography>
               <Select
@@ -80,6 +86,7 @@ export default function Application() {
                   height: "45px",
                   borderRadius: "5px",
                   background: "#EFF2F5",
+                  fontSize: (isPhone)? "0.8rem" : "1rem",
                 }}
               >
                 <MenuItem value={10}>FY 2023-24</MenuItem>
@@ -92,7 +99,9 @@ export default function Application() {
               alignItems={"center"}
               gap={1}
             >
-              <Typography sx={{ color: "#0F1629" }} variant="body2">
+              <Typography sx={{ color: "#0F1629" }}
+              variant={(isPhone) ? "caption" : "body2"}
+               >
                 Country
               </Typography>
               <Select
@@ -105,6 +114,7 @@ export default function Application() {
                   height: "45px",
                   borderRadius: "5px",
                   background: "#EFF2F5",
+                  fontSize: (isPhone)? "0.8rem" : "1rem",
                 }}
               >
                 <MenuItem value={10}>
@@ -133,7 +143,9 @@ export default function Application() {
           >
             <Stack className="price-info" direction={"row"} gap={6}>
               <Stack className="purchase-info" gap={1}>
-                <Typography>Enter purchase price of Crypto</Typography>
+                <Typography
+                variant={(isPhone) ? "caption" : "body2"}
+                >Enter purchase price of Crypto</Typography>
                 <TextField
                   InputProps={{
                     startAdornment: (
@@ -164,7 +176,9 @@ export default function Application() {
               </Stack>
 
               <Stack className="sale-info" gap={1}>
-                <Typography>Enter sale price of Crypto</Typography>
+                <Typography
+                variant={(isPhone) ? "caption" : "body2"}
+                >Enter sale price of Crypto</Typography>
                 <TextField
                   InputProps={{
                     startAdornment: (
@@ -204,8 +218,11 @@ export default function Application() {
               gap={6}
             >
               <Stack gap={1}>
-                <Typography>Enter purchase price of Crypto</Typography>
+                <Typography
+                variant={(isPhone) ? "caption" : "body2"}
+                >Enter your expenses</Typography>
                 <TextField
+                className="expense-input"
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -234,9 +251,11 @@ export default function Application() {
               </Stack>
 
               <Stack className="investment" gap={1}>
-                <Typography>Investment type</Typography>
+                <Typography
+                variant={(isPhone) ? "bosy1" : "body2"}
+                >Investment type</Typography>
 
-                <Stack direction={"row"} gap={1}>
+                <Stack direction={"row"} gap={2}>
                   <Stack
                     className="short-term"
                     paddingBottom={"1rem"}
@@ -307,6 +326,7 @@ export default function Application() {
           </Stack>
 
           <Stack
+          className="income"
             direction={"row"}
             width={"100%"}
             justifyContent={"center"}
@@ -349,10 +369,11 @@ export default function Application() {
             </Stack>
           </Stack>
 
-          <Stack direction={"row"} gap={6} width={"100%"}>
+          <Stack direction={"row"} gap={6} width={"100%"} className="gains">
             <Stack gap={1} width={"100%"} paddingTop={1}>
               <Typography>Capital gains amount</Typography>
               <TextField
+              className="capital-gains-value"
                 value={gainValue ? gainValue : "0.00"}
                 InputProps={{
                   readOnly: true,
@@ -385,6 +406,7 @@ export default function Application() {
             <Stack className="discount" gap={1} width={"100%"} paddingTop={1}>
               <Typography>Discount for long term gains</Typography>
               <TextField
+              className="discount-value"
                 value={gainValue ? gainValue : "0.00"}
                 InputProps={{
                   readOnly: true,
