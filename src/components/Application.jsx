@@ -12,12 +12,24 @@ import InputAdornment from "@mui/material/InputAdornment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import DoneIcon from '@mui/icons-material/Done';
+import Faq from './Faq'
 
 export default function Application() {
   const [age, setAge] = React.useState(10);
   const [income, setIncome] = React.useState(1);
   const [gainValue, setGainValue] = React.useState(0);
+  const [term , setTerm] = React.useState("");
   const isPhone = useMediaQuery('(max-width:500px)');
+
+  const [purchasePrice,setPurchasePrice] = React.useState(0);
+  const [salePrice,setSalePrice] = React.useState(0);
+  const [expense,setExpense] = React.useState(0);
+  const [tax,setTax] = React.useState(0);
+  const [taxPrice,SetTaxPrice] = React.useState(0);
+  const [discount,setDiscount] = React.useState(0);
+  const [netCapitalGain,setNetCapitalGain] = React.useState(0);
+  // const [taxPaid,setTaxPaid] = React.useState(0);
 
   const handleChange = (event) => {
     setAge(event.target.value);
@@ -27,10 +39,46 @@ export default function Application() {
     setIncome(event.target.value);
   };
 
-  const calculateGain = (purchasePrice, salePrice) => {
-    let gain = salePrice - purchasePrice;
+  const calculateGain = () => {
+    let gain = salePrice - purchasePrice- expense;
     setGainValue(gain);
   };
+
+  const calculateTax = () => {
+
+    if(income === 1){
+    SetTaxPrice("45001");
+    setTax("5092 + 32.5");
+    }
+    else if(income === 2){
+      SetTaxPrice("120001");
+      setTax("29467 + 37");
+    }
+    else if(income === 3){
+      SetTaxPrice("180001");
+      setTax("51667 + 45");
+    }
+
+    if(term === "long" && gainValue > 0){
+      const discountAccquired = (0.5)*gainValue;
+      setDiscount(discountAccquired);
+
+      const netGain = gainValue - discountAccquired;
+      setNetCapitalGain(netGain);
+    }
+    else{
+      setDiscount(0);
+      const netGain = gainValue;
+      setNetCapitalGain(netGain);
+    }
+    
+  }
+
+  React.useEffect(() => {
+    calculateGain();
+    calculateTax();
+
+  }, [purchasePrice, salePrice, expense,income,term,gainValue]);
 
   return (
     <Stack className="application-container" padding={3} direction={"row"} gap={3}>
@@ -147,6 +195,7 @@ export default function Application() {
                 variant={(isPhone) ? "caption" : "body2"}
                 >Enter purchase price of Crypto</Typography>
                 <TextField
+                onChange={(e) => setPurchasePrice(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -180,6 +229,7 @@ export default function Application() {
                 variant={(isPhone) ? "caption" : "body2"}
                 >Enter sale price of Crypto</Typography>
                 <TextField
+                onChange={(e) => setSalePrice(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -223,6 +273,7 @@ export default function Application() {
                 >Enter your expenses</Typography>
                 <TextField
                 className="expense-input"
+                onChange={(e) => setExpense(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
@@ -258,16 +309,18 @@ export default function Application() {
                 <Stack direction={"row"} gap={2}>
                   <Stack
                     className="short-term"
-                    paddingBottom={"1rem"}
+                    paddingBottom={"1.5rem"}
                     position={"relative"}
                   >
                     <Button
                       variant="outlined"
+                      className={`${term === "short" ? "selected-button" : ""}`}
+                      onClick={() => setTerm("short")}
                       sx={{
                         padding: "10px",
                         textTransform: "capitalize",
                         borderRadius: "6px",
-                        paddingRight: "60px",
+                        paddingRight: "50px",
                         color: "#0F1629",
                         height: "50px",
                       }}
@@ -276,6 +329,9 @@ export default function Application() {
                       }}
                     >
                       Short Term
+                      {
+                        (term === "short")  && <DoneIcon sx={{position: 'absolute', right: '15px'}} />
+                      }
                     </Button>
                     <Typography
                       position={"absolute"}
@@ -295,19 +351,25 @@ export default function Application() {
                     position={"relative"}
                   >
                     <Button
+                    className={`${term === "long" ? "selected-button" : ""}`}
                       variant="outlined"
+                      onClick={() => setTerm("long")}
                       sx={{
                         padding: "10px",
                         textTransform: "capitalize",
                         borderRadius: "6px",
-                        paddingRight: "60px",
+                        paddingRight: "50px",
                         color: "#0F1629",
+                        height: "50px",
                       }}
                       style={{
                         border: "1px solid #0F1629",
                       }}
                     >
                       Long Term
+                      {
+                        (term === "long")  && <DoneIcon sx={{position: 'absolute', right: '15px'}} />
+                      }
                     </Button>
                     <Typography
                       position={"absolute"}
@@ -363,13 +425,17 @@ export default function Application() {
               marginTop={4}
             >
               <Typography variant="body2">Tax Rate</Typography>
-              <Typography variant="caption" fontWeight={"bold"}>
-                0%
+              <Typography variant="caption" >
+              $ {tax}% of excess over ${taxPrice}
               </Typography>
             </Stack>
           </Stack>
 
-          <Stack direction={"row"} gap={6} width={"100%"} className="gains">
+          <Stack direction={"row"} 
+          display={(term === "long" && gainValue>0) ? "flex" : "none"}
+          gap={6}
+           width={"100%"}
+            className="gains">
             <Stack gap={1} width={"100%"} paddingTop={1}>
               <Typography>Capital gains amount</Typography>
               <TextField
@@ -407,7 +473,7 @@ export default function Application() {
               <Typography>Discount for long term gains</Typography>
               <TextField
               className="discount-value"
-                value={gainValue ? gainValue : "0.00"}
+              value={discount ? discount : "0.00"}
                 InputProps={{
                   readOnly: true,
                   startAdornment: (
@@ -459,7 +525,9 @@ export default function Application() {
             >
               <Typography>Net Capital gains tax amount</Typography>
               <Typography variant="h5" color={"#0FBA83"} fontWeight={"bold"}>
-                $0.00
+                {
+                  (netCapitalGain) ? `${netCapitalGain}` : "$0.00"
+                }
               </Typography>
             </Stack>
             <Stack
@@ -482,6 +550,12 @@ export default function Application() {
             </Stack>
           </Stack>
         </Stack>
+
+
+        <Stack className="faq">
+        <Faq />
+        </Stack>
+
       </Stack>
       <Stack className="right">
         <Stack
@@ -545,6 +619,7 @@ export default function Application() {
     
           </Stack>
         </Stack>
+        
       </Stack>
     </Stack>
   );
