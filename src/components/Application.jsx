@@ -10,29 +10,49 @@ import {
 import React from "react";
 import InputAdornment from "@mui/material/InputAdornment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import useMediaQuery from '@mui/material/useMediaQuery';
-import DoneIcon from '@mui/icons-material/Done';
-import Faq from './Faq'
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import DoneIcon from "@mui/icons-material/Done";
+import Faq from "./Faq";
+import CircularProgress from "@mui/material/CircularProgress";
+
+const prices = [
+  {
+    countryValue: 10,
+    sym: "$",
+  },
+  {
+    countryValue: 20,
+    sym: "Rs",
+  },
+];
 
 export default function Application() {
-  const [age, setAge] = React.useState(10);
+  const [country, setcountry] = React.useState(10);
   const [income, setIncome] = React.useState(1);
   const [gainValue, setGainValue] = React.useState(0);
-  const [term , setTerm] = React.useState("");
-  const isPhone = useMediaQuery('(max-width:500px)');
+  const [term, setTerm] = React.useState("");
+  const isPhone = useMediaQuery("(max-width:500px)");
 
-  const [purchasePrice,setPurchasePrice] = React.useState(0);
-  const [salePrice,setSalePrice] = React.useState(0);
-  const [expense,setExpense] = React.useState(0);
-  const [tax,setTax] = React.useState(0);
-  const [taxPrice,SetTaxPrice] = React.useState(0);
-  const [discount,setDiscount] = React.useState(0);
-  const [netCapitalGain,setNetCapitalGain] = React.useState(0);
+  const [purchasePrice, setPurchasePrice] = React.useState(0);
+  const [salePrice, setSalePrice] = React.useState(0);
+  const [expense, setExpense] = React.useState(0);
+  const [tax, setTax] = React.useState(0);
+  const [taxPrice, SetTaxPrice] = React.useState(0);
+  const [discount, setDiscount] = React.useState(0);
+  const [netCapitalGain, setNetCapitalGain] = React.useState(0);
+  const [sy, setSy] = React.useState("$");
+  const [loading, setLoading] = React.useState(false);
   // const [taxPaid,setTaxPaid] = React.useState(0);
 
   const handleChange = (event) => {
-    setAge(event.target.value);
+    setcountry(event.target.value);
+
+    for (let i = 0; i < prices.length; i++) {
+      if (prices[i].countryValue === event.target.value) {
+        setSy(prices[i].sym);
+      }
+    }
   };
 
   const handleTermChange = (event) => {
@@ -40,48 +60,62 @@ export default function Application() {
   };
 
   const calculateGain = () => {
-    let gain = salePrice - purchasePrice- expense;
+    let gain = salePrice - purchasePrice - expense;
     setGainValue(gain);
   };
 
   const calculateTax = () => {
-
-    if(income === 1){
-    SetTaxPrice("45001");
-    setTax("5092 + 32.5");
-    }
-    else if(income === 2){
+    if (income === 1) {
+      SetTaxPrice("45001");
+      setTax("5092 + 32.5");
+    } else if (income === 2) {
       SetTaxPrice("120001");
       setTax("29467 + 37");
-    }
-    else if(income === 3){
+    } else if (income === 3) {
       SetTaxPrice("180001");
       setTax("51667 + 45");
     }
 
-    if(term === "long" && gainValue > 0){
-      const discountAccquired = (0.5)*gainValue;
+    if (term === "long" && gainValue > 0) {
+      const discountAccquired = 0.5 * gainValue;
       setDiscount(discountAccquired);
 
       const netGain = gainValue - discountAccquired;
       setNetCapitalGain(netGain);
-    }
-    else{
+    } else {
       setDiscount(0);
       const netGain = gainValue;
       setNetCapitalGain(netGain);
     }
-    
-  }
+  };
 
   React.useEffect(() => {
-    calculateGain();
-    calculateTax();
+    setTimeout(() => {
+      const fun = async () => {
+        calculateGain();
+        calculateTax();
+      };
+      fun()
+        .then(() => {
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }, 2000);
 
-  }, [purchasePrice, salePrice, expense,income,term,gainValue]);
+    // ()=>{
+    //   clearTimeout();
+    // }
+  }, [purchasePrice, salePrice, expense, income, term, gainValue]);
 
   return (
-    <Stack className="application-container" padding={3} direction={"row"} gap={3}>
+    <Stack
+      className="application-container"
+      padding={3}
+      direction={"row"}
+      gap={3}
+    >
       <Stack
         className="left"
         padding={3}
@@ -94,8 +128,7 @@ export default function Application() {
           borderRadius: "10px",
         }}
       >
-        <Typography variant={(isPhone) ? "body1" : "h5"}
-         fontWeight={"bold"}>
+        <Typography variant={isPhone ? "body1" : "h5"} fontWeight={"bold"}>
           Free Crypto Tax Calculator Australia
         </Typography>
 
@@ -106,9 +139,9 @@ export default function Application() {
           gap={3}
         >
           <Stack
-          className="upper-info"
+            className="upper-info"
             direction={"row"}
-            gap={(isPhone)? 2 : 6}
+            gap={isPhone ? 2 : 6}
             width={"100%"}
             justifyContent={"left"}
             alignItems={"center"}
@@ -119,22 +152,23 @@ export default function Application() {
               alignItems={"center"}
               gap={1}
             >
-              <Typography sx={{ color: "#0F1629" }} 
-              variant={(isPhone) ? "caption" : "body2"}
+              <Typography
+                sx={{ color: "#0F1629" }}
+                variant={isPhone ? "caption" : "body2"}
               >
                 Financial Year
               </Typography>
               <Select
                 labelId="demo-simple-select-filled-label"
                 id="demo-simple-select-filled"
-                value={age}
+                value={country}
                 onChange={handleChange}
                 sx={{
                   width: "200px",
                   height: "45px",
                   borderRadius: "5px",
                   background: "#EFF2F5",
-                  fontSize: (isPhone)? "0.8rem" : "1rem",
+                  fontSize: isPhone ? "0.8rem" : "1rem",
                 }}
               >
                 <MenuItem value={10}>FY 2023-24</MenuItem>
@@ -147,28 +181,35 @@ export default function Application() {
               alignItems={"center"}
               gap={1}
             >
-              <Typography sx={{ color: "#0F1629" }}
-              variant={(isPhone) ? "caption" : "body2"}
-               >
+              <Typography
+                sx={{ color: "#0F1629" }}
+                variant={isPhone ? "caption" : "body2"}
+              >
                 Country
               </Typography>
               <Select
                 labelId="demo-simple-select-filled-label"
                 id="demo-simple-select-filled"
-                value={age}
+                value={country}
                 onChange={handleChange}
                 sx={{
                   width: "200px",
                   height: "45px",
                   borderRadius: "5px",
                   background: "#EFF2F5",
-                  fontSize: (isPhone)? "0.8rem" : "1rem",
+                  fontSize: isPhone ? "0.8rem" : "1rem",
                 }}
               >
                 <MenuItem value={10}>
                   <Stack direction={"row"} gap={1}>
                     <img src="svg/flag.svg" alt="" />
-                    FY 2023-24
+                    Aus
+                  </Stack>
+                </MenuItem>
+                <MenuItem value={20}>
+                  <Stack direction={"row"} gap={1}>
+                    <img src="svg/flag.svg" alt="" />
+                    IN
                   </Stack>
                 </MenuItem>
               </Select>
@@ -191,15 +232,24 @@ export default function Application() {
           >
             <Stack className="price-info" direction={"row"} gap={6}>
               <Stack className="purchase-info" gap={1}>
-                <Typography
-                variant={(isPhone) ? "caption" : "body2"}
-                >Enter purchase price of Crypto</Typography>
+                <Typography variant={isPhone ? "caption" : "body2"}>
+                  Enter purchase price of Crypto
+                </Typography>
                 <TextField
-                onChange={(e) => setPurchasePrice(e.target.value)}
+                className="purchase-input"
+                type="number"
+                  onKeyDown={() => {
+                    setLoading(true);
+                  }}
+                  onChange={(e) => setPurchasePrice(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <AttachMoneyIcon sx={{ color: "black" }} />
+                        {country === 10 ? (
+                          <AttachMoneyIcon sx={{ color: "black" }} />
+                        ) : (
+                          <Typography>Rs</Typography>
+                        )}
                       </InputAdornment>
                     ),
                   }}
@@ -225,15 +275,21 @@ export default function Application() {
               </Stack>
 
               <Stack className="sale-info" gap={1}>
-                <Typography
-                variant={(isPhone) ? "caption" : "body2"}
-                >Enter sale price of Crypto</Typography>
+                <Typography variant={isPhone ? "caption" : "body2"}>
+                  Enter sale price of Crypto
+                </Typography>
                 <TextField
-                onChange={(e) => setSalePrice(e.target.value)}
+                className="sale-input"
+                type="number"
+                  onChange={(e) => setSalePrice(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <AttachMoneyIcon sx={{ color: "black" }} />
+                        {country === 10 ? (
+                          <AttachMoneyIcon sx={{ color: "black" }} />
+                        ) : (
+                          <Typography>Rs</Typography>
+                        )}
                       </InputAdornment>
                     ),
                   }}
@@ -268,16 +324,20 @@ export default function Application() {
               gap={6}
             >
               <Stack gap={1}>
-                <Typography
-                variant={(isPhone) ? "caption" : "body2"}
-                >Enter your expenses</Typography>
+                <Typography variant={isPhone ? "caption" : "body2"}>
+                  Enter your expenses
+                </Typography>
                 <TextField
-                className="expense-input"
-                onChange={(e) => setExpense(e.target.value)}
+                  className="expense-input"
+                  onChange={(e) => setExpense(e.target.value)}
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <AttachMoneyIcon sx={{ color: "black" }} />
+                        {country === 10 ? (
+                          <AttachMoneyIcon sx={{ color: "black" }} />
+                        ) : (
+                          <Typography>Rs</Typography>
+                        )}
                       </InputAdornment>
                     ),
                   }}
@@ -302,9 +362,9 @@ export default function Application() {
               </Stack>
 
               <Stack className="investment" gap={1}>
-                <Typography
-                variant={(isPhone) ? "bosy1" : "body2"}
-                >Investment type</Typography>
+                <Typography variant={isPhone ? "bosy1" : "body2"}>
+                  Investment type
+                </Typography>
 
                 <Stack direction={"row"} gap={2}>
                   <Stack
@@ -329,9 +389,11 @@ export default function Application() {
                       }}
                     >
                       Short Term
-                      {
-                        (term === "short")  && <DoneIcon sx={{position: 'absolute', right: '15px'}} />
-                      }
+                      {term === "short" && (
+                        <DoneIcon
+                          sx={{ position: "absolute", right: "15px" }}
+                        />
+                      )}
                     </Button>
                     <Typography
                       position={"absolute"}
@@ -351,7 +413,7 @@ export default function Application() {
                     position={"relative"}
                   >
                     <Button
-                    className={`${term === "long" ? "selected-button" : ""}`}
+                      className={`${term === "long" ? "selected-button" : ""}`}
                       variant="outlined"
                       onClick={() => setTerm("long")}
                       sx={{
@@ -367,9 +429,11 @@ export default function Application() {
                       }}
                     >
                       Long Term
-                      {
-                        (term === "long")  && <DoneIcon sx={{position: 'absolute', right: '15px'}} />
-                      }
+                      {term === "long" && (
+                        <DoneIcon
+                          sx={{ position: "absolute", right: "15px" }}
+                        />
+                      )}
                     </Button>
                     <Typography
                       position={"absolute"}
@@ -388,7 +452,7 @@ export default function Application() {
           </Stack>
 
           <Stack
-          className="income"
+            className="income"
             direction={"row"}
             width={"100%"}
             justifyContent={"center"}
@@ -410,9 +474,15 @@ export default function Application() {
                   background: "#EFF2F5",
                 }}
               >
-                <MenuItem value={1}> 0 - $45,000</MenuItem>
-                <MenuItem value={2}> $45000 - $120,000</MenuItem>
-                <MenuItem value={3}> $120,000 - $180,000</MenuItem>
+                <MenuItem value={1}> 0 - {sy}45,000</MenuItem>
+                <MenuItem value={2}>
+                  {" "}
+                  {sy}45000 - {sy}120,000
+                </MenuItem>
+                <MenuItem value={3}>
+                  {" "}
+                  {sy}120,000 - {sy}180,000
+                </MenuItem>
               </Select>
             </Stack>
 
@@ -425,21 +495,23 @@ export default function Application() {
               marginTop={4}
             >
               <Typography variant="body2">Tax Rate</Typography>
-              <Typography variant="caption" >
-              $ {tax}% of excess over ${taxPrice}
+              <Typography variant="caption">
+                $ {tax}% of excess over ${taxPrice}
               </Typography>
             </Stack>
           </Stack>
 
-          <Stack direction={"row"} 
-          display={(term === "long" && gainValue>0) ? "flex" : "none"}
-          gap={6}
-           width={"100%"}
-            className="gains">
+          <Stack
+            direction={"row"}
+            display={term === "long" && gainValue > 0 ? "flex" : "none"}
+            gap={6}
+            width={"100%"}
+            className="gains"
+          >
             <Stack gap={1} width={"100%"} paddingTop={1}>
               <Typography>Capital gains amount</Typography>
               <TextField
-              className="capital-gains-value"
+                className="capital-gains-value"
                 value={gainValue ? gainValue : "0.00"}
                 InputProps={{
                   readOnly: true,
@@ -472,8 +544,8 @@ export default function Application() {
             <Stack className="discount" gap={1} width={"100%"} paddingTop={1}>
               <Typography>Discount for long term gains</Typography>
               <TextField
-              className="discount-value"
-              value={discount ? discount : "0.00"}
+                className="discount-value"
+                value={discount ? discount : "0.00"}
                 InputProps={{
                   readOnly: true,
                   startAdornment: (
@@ -525,9 +597,13 @@ export default function Application() {
             >
               <Typography>Net Capital gains tax amount</Typography>
               <Typography variant="h5" color={"#0FBA83"} fontWeight={"bold"}>
-                {
-                  (netCapitalGain) ? `${netCapitalGain}` : "$0.00"
-                }
+                {loading ? (
+                  <CircularProgress />
+                ) : netCapitalGain ? (
+                  `${netCapitalGain}`
+                ) : (
+                  "$0.00"
+                )}
               </Typography>
             </Stack>
             <Stack
@@ -551,11 +627,9 @@ export default function Application() {
           </Stack>
         </Stack>
 
-
         <Stack className="faq">
-        <Faq />
+          <Faq />
         </Stack>
-
       </Stack>
       <Stack className="right">
         <Stack
@@ -566,60 +640,63 @@ export default function Application() {
           }}
           maxWidth={"380px"}
         >
-          <Stack padding={3} justifyContent={"center"} alignItems={"center"} gap={2}>
-           
-           <Stack maxWidth={'100%'}  justifyContent={'center'} alignItems={'center'} >
-
-            <Typography
-              color={"white"}
-              maxWidth={"80%"}
-              textAlign={"center"}
-              fontWeight={"bold"}
+          <Stack
+            padding={3}
+            justifyContent={"center"}
+            alignItems={"center"}
+            gap={2}
+          >
+            <Stack
+              maxWidth={"100%"}
+              justifyContent={"center"}
+              alignItems={"center"}
+            >
+              <Typography
+                color={"white"}
+                maxWidth={"80%"}
+                textAlign={"center"}
+                fontWeight={"bold"}
               >
-              Get Started with KoinX for FREE
-            </Typography>
+                Get Started with KoinX for FREE
+              </Typography>
+            </Stack>
 
-                </Stack>
+            <Stack justifyContent={"center"} alignItems={"center"}>
+              <Typography
+                color={"white"}
+                variant="caption"
+                maxWidth={"85%"}
+                textAlign={"center"}
+              >
+                With our range of features that you can equip for free, KoinX
+                allows you to be more educated and aware of your tax reports.
+              </Typography>
+            </Stack>
 
-                <Stack  justifyContent={'center'} alignItems={'center'}>
-                <Typography
-             color={"white"}
-             variant="caption"
-             maxWidth={"85%"}
-             textAlign={"center"}
-             >
-              With our range of features that you can equip for free, KoinX
-              allows you to be more educated and aware of your tax reports.
-            </Typography>
-                </Stack>
+            <Stack paddingTop={6}>
+              <img src="svg/imcountry.svg" alt="" />
+            </Stack>
 
-                <Stack paddingTop={6}>
-                    <img src="svg/image.svg" alt="" />
-                </Stack>
-
-                <Stack paddingTop={6}>
-                    <Button
-                    variant="contained"
-                    sx={{
-                        background: "white",
-                        color: "black",
-                        textTransform: "capitalize",
-                        fontSize: "0.9rem",
-                        '&:hover': {
-                            background: 'white',
-                            color: 'black'
-                        }
-                    }}
-
-                    >
-                    Get Started for FREE
-                    <ArrowForwardIcon />
-                    </Button>
-                    </Stack>
-    
+            <Stack paddingTop={6}>
+              <Button
+                variant="contained"
+                sx={{
+                  background: "white",
+                  color: "black",
+                  textTransform: "capitalize",
+                  fontSize: "0.9rem",
+                  "&:hover": {
+                    background: "white",
+                    color: "black",
+                  },
+                }}
+              >
+                Get Started for FREE
+                <ArrowForwardIcon />
+              </Button>
+            </Stack>
           </Stack>
         </Stack>
-        
       </Stack>
     </Stack>
   );
